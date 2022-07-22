@@ -1,12 +1,23 @@
 package logIn;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import com.google.common.io.Files;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.Assert;
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Random;
+
 
 public class loginPageTest {
     public static WebDriver driver;
@@ -42,7 +53,24 @@ public class loginPageTest {
         WebElement loginButton = driver.findElement(By.className("fa-sign-in"));
         loginButton.click();
 
-        Assert.assertTrue(driver.findElement(By.id("flash")).getText().contains("Your username is invalid!"));
+        Assert.assertTrue(driver.findElement(By.id("flash")).getText().contains("secure"));
+    }
+
+    @AfterMethod
+    public void recordFailure (ITestResult result){
+        if(ITestResult.FAILURE == result.getStatus())
+        {
+            var camera = (TakesScreenshot)driver;
+            File screenshot = camera.getScreenshotAs(OutputType.FILE);
+            try{
+                Random rn =new Random();
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+                System.out.println("lllllll"+LocalDateTime.now());
+                Files.move(screenshot, new File("resources/screenshots/" + result.getName() + timeStamp + ".png"));
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
     }
 
 
