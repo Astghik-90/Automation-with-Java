@@ -1,17 +1,25 @@
 package base;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import io.qameta.allure.Allure;
+import io.qameta.allure.Step;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+import org.testng.ITestResult;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.ITestResult;
 
+import java.io.ByteArrayInputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.channels.WritableByteChannel;
 import java.time.Duration;
 import java.util.List;
@@ -22,9 +30,13 @@ public class webDriver {
     public static WebDriver driver;
 
     @BeforeClass
-    public static void initWebDriver() {
-        System.setProperty("webdriver.chrome.driver", "resources/chromedriver.exe");
+    public static void initWebDriver() throws MalformedURLException {
+        System.setProperty("webdriver.chrome.driver", "C:/Users/ayvaz/Downloads/chromedriver.exe");
         driver = new ChromeDriver();
+//        DesiredCapabilities capability = new DesiredCapabilities();
+//        driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), capability);
+//        capability.setBrowserName("chrome");
+//        capability.setPlatform(Platform.WINDOWS);
     }
 
     @Test
@@ -64,6 +76,7 @@ public class webDriver {
     }
 
     @Test
+    @Step("Step 1")
     public void sortingTest(){
         driver.get("http://automationpractice.com/index.php?controller=search&orderby=position&orderway=desc&search_query=dress&submit_search=");
         WebElement ddMenu = driver.findElement(By.id("selectProductSort"));
@@ -90,12 +103,39 @@ public class webDriver {
 
     }
 
-    @AfterClass
-    public static void closeBrowser(){
-        driver.quit();
-    }
+    //Alert test
+    @Test
+    public void alertTest() throws InterruptedException {
+        driver.get("https://demo.guru99.com/test/delete_customer.php");
+        WebElement inputField = driver.findElement(By.xpath("//input[@name='cusid']"));
+        inputField.sendKeys("test");
+        WebElement submitButton = driver.findElement(By.xpath("//input[@name='submit']"));
+        submitButton.click();
+        Thread.sleep(3000);
+        driver.switchTo().alert();
+        System.out.println(driver.switchTo().alert().getText());
+        Thread.sleep(3000);
+        driver.switchTo().alert().accept();
+        System.out.println(driver.switchTo().alert().getText());
 
     }
+
+    @AfterMethod
+    public static void report(ITestResult result) {
+        if (ITestResult.FAILURE == result.getStatus()) {
+            Allure.addAttachment("",
+                    new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)));
+        }
+    }
+        @AfterClass
+        public static void closeBrowser () {
+            driver.quit();
+        }
+
+    }
+
+
+
 
 //    @BeforeClass
 //    public static void initWebDriver() {
